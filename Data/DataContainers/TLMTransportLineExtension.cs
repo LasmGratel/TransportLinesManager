@@ -69,17 +69,18 @@ namespace TransportLinesManager.Data.DataContainers
 
             return m_basicAssetsList[tsd].ToDictionary(x => x, x => Locale.Get("VEHICLE_TITLE", x.name));
         }
-        public VehicleInfo GetAModel(ushort lineId, string status)
+        public VehicleInfo GetAModel(ushort lineID, string status)
         {
             VehicleInfo info = null;
-            List<TransportAsset> assetTransportList = ExtensionStaticExtensionMethods.GetAssetTransportListForLine(this, lineId);
-            while (info == null && assetTransportList.Count > 0)
+            List<string> assetList = this.GetAssetListForLine(lineID);
+            while (info == null && assetList.Count > 0)
             {
-                info = VehicleUtils.GetModelByPercentageOrCount(assetTransportList, lineId, out string modelName, status);
+                //info = VehicleUtils.GetModelByPercentageOrCount(assetList, lineID, out string modelName, status);
+                info = VehicleUtils.GetRandomModel(assetList, out string modelName);
                 if (info == null)
                 {
-                    ExtensionStaticExtensionMethods.RemoveAssetFromLine(this, lineId, modelName);
-                    assetTransportList = ExtensionStaticExtensionMethods.GetAssetTransportListForLine(this, lineId);
+                    this.RemoveAssetFromLine(lineID, modelName);
+                    assetList = this.GetAssetListForLine(lineID);
                 }
             }
             return info;

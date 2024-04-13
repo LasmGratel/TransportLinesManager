@@ -22,9 +22,9 @@ namespace TransportLinesManager.WorldInfoPanels.Components
 
         protected override void AsTitleInternal()
         {
-            m_low.text = "§";
+            m_low.text = "?";
             m_med.text = "§§";
-            m_hgh.text = "§§§";
+            m_hgh.text = "§§?";
             m_total.text = Locale.Get("INFO_PUBLICTRANSPORT_TOTAL");
 
             m_low.textAlignment = UIHorizontalAlignment.Center;
