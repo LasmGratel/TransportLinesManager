@@ -1,20 +1,31 @@
-﻿using Commons.Utils;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Commons.Utils;
+using TransportLinesManager.Palettes.DistinctColors;
 using UnityEngine;
 
 namespace TransportLinesManager.Palettes
 {
     public class RandomPastelColorGenerator
     {
-        private readonly System.Random _random;
+        private Queue<Color32> colorQueue;
 
         public RandomPastelColorGenerator()
         {
-            // seed the generator with 2 because
-            // this gives a good sequence of colors
-            const int RandomSeed = 2;
-            _random = new System.Random(RandomSeed);
+            colorQueue = new Queue<Color32>(GenNewQueue());
         }
 
+
+        public IEnumerable<Color32> GenNewQueue()
+        {
+            var c = new DistinctColors.DistinctColors();
+            c.Possibles.AddRange(DistinctColors.DistinctColors.GeneratePossibleColor(true,
+                DistinctColors.DistinctColors.GetAxes(0, 360, 8).ToList(),
+                DistinctColors.DistinctColors.GetAxes(100, 25, 25).ToList(),
+                DistinctColors.DistinctColors.GetAxes(100, 20, 5).ToList()
+            ));
+            return ColorHelper.Interleave(c.FindResults(15), 3).Select(x => x.Lab2Rgb());
+        }
 
         /// <summary>
         /// Returns a random pastel color
@@ -22,22 +33,15 @@ namespace TransportLinesManager.Palettes
         /// <returns></returns>
         public Color32 GetNext()
         {
-            // to create lighter colours:
-            // take a random integer between 0 & 128 (rather than between 0 and 255)
-            // and then add 64 to make the colour lighter
-            byte[] colorBytes = new byte[3];
-            colorBytes[0] = (byte)(_random.Next(128) + 64);
-            colorBytes[1] = (byte)(_random.Next(128) + 64);
-            colorBytes[2] = (byte)(_random.Next(128) + 64);
-            Color32 color = new Color32
+            if (colorQueue.Count == 0)
             {
-
-                // make the color fully opaque
-                a = 255,
-                r = colorBytes[0],
-                g = colorBytes[1],
-                b = colorBytes[2]
-            };
+                foreach (var newColor in GenNewQueue())
+                {
+                    colorQueue.Enqueue(newColor);
+                }
+                
+            }
+            var color = colorQueue.Dequeue();
             LogUtils.DoLog(color.ToString());
 
             return color;
